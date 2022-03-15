@@ -10,6 +10,7 @@ module.exports = (db) => {
     app.get('/health', (req, res) => res.send('Healthy'));
 
     app.post('/rides', jsonParser, (req, res) => {
+        
         const startLatitude = Number(req.body.start_lat);
         const startLongitude = Number(req.body.start_long);
         const endLatitude = Number(req.body.end_lat);
@@ -77,7 +78,15 @@ module.exports = (db) => {
     });
 
     app.get('/rides', (req, res) => {
-        db.all('SELECT * FROM Rides', function (err, rows) {
+        const offset = parseInt(req.query.offset);
+        const limit = parseInt(req.query.limit);
+       
+        let query = 'SELECT * FROM Rides';
+        if(offset && limit){
+            query = `SELECT * FROM Rides LIMIT ${limit} OFFSET ${offset}`;
+        }
+        
+        db.all(query, function (err, rows) {
             if (err) {
                 return res.send({
                     error_code: 'SERVER_ERROR',
